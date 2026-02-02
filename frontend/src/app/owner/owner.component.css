@@ -1,0 +1,14 @@
+.owner-container{
+    padding: 20px;
+}
+.header{
+    display: flex;
+    justify-content: space-between;
+    background: #333;
+    color: white;
+    padding: 10px;
+}
+th,td{
+    padding: 10px;
+    text-align:center;
+}

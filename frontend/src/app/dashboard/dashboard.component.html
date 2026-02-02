@@ -1,0 +1,30 @@
+
+<div class = "dash-container">
+    <div class = "header">
+        <h1>Welcome, {{user?.username}}</h1>
+        <button (click) ="logout()" class = "logout-btn">Logout</button>
+    </div>
+    <div class="card balance-card">
+        <h3>Your Balance</h3>
+        <h1 *ngIf = "account">${{account.balance}}</h1>
+        <p *ngIf>Acc No: {{account.accountNumber}}</p>
+    </div>
+
+    <div class="card">
+        <h3>Transfer Money</h3>
+        <input [(ngModel)] = "targetId" placeholder="TargetAccountId" class="input-box">
+        <input [(ngModel)] = "amount" placeholder="Amount" class="input-box">
+        <button (click) = "sendMoney()" class = 'btn'>Send</button>
+    </div>
+
+    <div class="card">
+        <h3>Transaction History</h3>
+        <table>
+            <tr *ngFor = "let txn of history">
+                <td>{{txn.createdAt|date:'short'}}</td>
+                <td>${{txn.amount}}</td>
+                <td>{{txn.status}}</td>
+            </tr>
+        </table>
+    </div>
+</div>

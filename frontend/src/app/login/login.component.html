@@ -1,0 +1,15 @@
+
+<div class= "container">
+    <h2>Bank Transfer Login</h2>
+    <div *ngIf = "step ===1">
+        <input [(ngModel)] = "user" placeholder="username" class="input-box">
+        <input [(ngModel)] = "pass" placeholder="password" class="input-box">
+        <button (click) = "onLogin()">Get OTP</button>
+    </div>
+
+    <div *ngIf = "step === 2">
+        <p>Enter the OTp sent to your backend console/alert</p>
+        <input [(ngModel)] = "otp" placeholder="Enter OTP" class="input-box">
+        <button (click) = "onVerify()" class ="btn">Verify & Log-in</button>
+    </div>
+</div>

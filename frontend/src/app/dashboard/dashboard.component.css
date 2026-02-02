@@ -1,0 +1,37 @@
+.dash-container{
+    padding: 20px;
+    max-width: 600px;
+    margin: auto;
+}
+.header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.card{
+    border: 1px solid #ddd;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+.balance-card{
+    background-color: #e3f2fd;
+}
+.input-box{
+    padding: 8px;
+    margin-right:10px;
+}
+.btn{
+    background-color: #dc3545;
+    color: white;
+    border:none;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+table{
+    width: 100%;
+}
+td{
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+}

@@ -1,0 +1,31 @@
+
+<div class = "owner-container">
+    <div class = "header">
+        <h1>ADMIN Dashboard</h1>
+        <button (click) ="logout()">Logout</button>
+    </div>
+    <h3>System-Wide Transactions</h3>
+    <table border="1" style="width: 100% ; border-collapse: collapse;">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>From Acc</th>
+                <th>To Acc</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor = "let t of allTransactions">
+                <td>{{t.id}}</td>
+                <td>{{t.sourceAccountId}}</td>
+                <td>{{ t.targetAccountId}}</td>
+                <td>\${{t.amount}}</td>
+                <td>{{t.status}}</td>
+                <td>{{t.createdAt | date:'short}}</td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
