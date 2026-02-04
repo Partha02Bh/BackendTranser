@@ -1,37 +1,291 @@
-.dash-container{
-    padding: 20px;
-    max-width: 600px;
-    margin: auto;
+.dashboard-container {
+    min-height: 100vh;
+    background: #f5f7fa;
 }
-.header{
+
+header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-.card{
-    border: 1px solid #ddd;
-    padding: 20px;
-    margin-bottom: 20px;
-    border-radius: 8px;
-}
-.balance-card{
-    background-color: #e3f2fd;
-}
-.input-box{
-    padding: 8px;
-    margin-right:10px;
-}
-.btn{
-    background-color: #dc3545;
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    border:none;
-    padding: 5px 10px;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.logout-btn {
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 4px;
     cursor: pointer;
 }
-table{
-    width: 100%;
+
+.logout-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
 }
-td{
-    padding: 8px;
+
+/* User info in header */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.role-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    background: rgba(40, 167, 69, 0.9);
+}
+
+.role-badge.admin {
+    background: rgba(220, 53, 69, 0.9);
+}
+
+.username {
+    font-weight: 500;
+}
+
+/* Admin specific styles */
+.admin-card {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+}
+
+.admin-card h2 {
+    color: white;
+    border-bottom-color: rgba(255, 255, 255, 0.3);
+}
+
+.admin-notice {
+    margin: 0;
+    opacity: 0.9;
+}
+
+.txn-details {
+    font-weight: 500;
+    color: #333;
+}
+
+.content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+}
+
+.card h2 {
+    margin-top: 0;
+    color: #333;
     border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+/* Account Card */
+.account-card {
+    grid-column: 1 / -1;
+}
+
+.account-info {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+
+.info-item {
+    text-align: center;
+}
+
+.info-item label {
+    display: block;
+    color: #888;
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+}
+
+.info-item span {
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.status.active {
+    color: #28a745;
+}
+
+.balance-display {
+    text-align: center;
+}
+
+.balance-display label {
+    display: block;
+    color: #888;
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+}
+
+.balance {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #667eea;
+}
+
+/* Transfer Card */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 0.75rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+button[type="submit"]:hover {
+    opacity: 0.9;
+}
+
+button[type="submit"]:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.success-msg {
+    background: #d4edda;
+    color: #155724;
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.error-msg {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 0.75rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+/* Transaction History */
+.history-card {
+    grid-column: 1 / -1;
+}
+
+.no-transactions {
+    text-align: center;
+    color: #888;
+    padding: 2rem;
+}
+
+.transaction-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.transaction {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.transaction:last-child {
+    border-bottom: none;
+}
+
+.txn-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.txn-type {
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+}
+
+.sent .txn-type {
+    color: #dc3545;
+}
+
+.received .txn-type {
+    color: #28a745;
+}
+
+.txn-id {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.txn-date {
+    color: #888;
+    font-size: 0.8rem;
+}
+
+.txn-amount {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.txn-amount.negative {
+    color: #dc3545;
+}
+
+.txn-amount:not(.negative) {
+    color: #28a745;
+}
+
+@media (max-width: 768px) {
+    .content {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+    }
+
+    .account-info {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
