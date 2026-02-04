@@ -21,10 +21,10 @@ spring:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
 
-  # SQL initialization (only run on first startup, not on every restart)
+  # SQL initialization (runs on startup to ensure data exists)
   sql:
     init:
-      mode: never
+      mode: always
       data-locations: classpath:data.sql
 
 # Server Configuration
