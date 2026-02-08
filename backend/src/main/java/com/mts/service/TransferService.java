@@ -28,6 +28,7 @@ public class TransferService {
 
         private final AccountRepository accountRepo;
         private final TransactionLogRepository txnRepo;
+        private final NotificationService notificationService;
 
         // Main transfer method - validates and executes the transfer
         @Transactional
@@ -47,6 +48,13 @@ public class TransferService {
 
                 // all good - do the transfer
                 TransactionLog txn = performTransfer(src, dest, req);
+
+                // Send async notification (non-blocking, runs in background)
+                notificationService.notifyTransferSuccess(
+                                txn.getId(),
+                                req.getFromAccountId(),
+                                req.getToAccountId(),
+                                req.getAmount());
 
                 return buildResponse(txn);
         }
@@ -131,9 +139,11 @@ public class TransferService {
 
         // Admin endpoint - gets everything
         public List<TransactionHistoryResponse> getAllTransactions() {
-                return txnRepo.findAll().stream()
+                List<TransactionHistoryResponse> txns = txnRepo.findAll().stream()
                                 .map(this::toHistoryResponse)
                                 .toList();
+                log.info("Returning all transactions: {}", txns);
+                return txns;
         }
 
         // User endpoint - only their transactions
@@ -143,24 +153,34 @@ public class TransferService {
                                                 "Account not found for user: " + username));
 
                 Long id = acct.getId();
-                return txnRepo.findByFromAccountIdOrToAccountId(id, id).stream()
+                List<TransactionHistoryResponse> txns = txnRepo.findByFromAccountIdOrToAccountId(id, id).stream()
                                 .map(this::toHistoryResponse)
                                 .toList();
+                log.info("Returning transactions for user {}: {}", username, txns);
+                return txns;
         }
 
         private TransactionHistoryResponse toHistoryResponse(TransactionLog txn) {
-                // lookup usernames for display
-                String fromUser = accountRepo.findById(txn.getFromAccountId())
-                                .map(Account::getUsername).orElse("Unknown");
-                String toUser = accountRepo.findById(txn.getToAccountId())
-                                .map(Account::getUsername).orElse("Unknown");
+                // lookup usernames and holder names for display
+                Account fromAccount = accountRepo.findById(txn.getFromAccountId())
+                                .orElse(null);
+                Account toAccount = accountRepo.findById(txn.getToAccountId())
+                                .orElse(null);
+
+                String fromUser = (fromAccount != null) ? fromAccount.getUsername() : "Unknown";
+                String fromHolder = (fromAccount != null) ? fromAccount.getHolderName() : "Unknown";
+
+                String toUser = (toAccount != null) ? toAccount.getUsername() : "Unknown";
+                String toHolder = (toAccount != null) ? toAccount.getHolderName() : "Unknown";
 
                 return TransactionHistoryResponse.builder()
                                 .transactionId(txn.getId())
                                 .fromAccountId(txn.getFromAccountId())
                                 .fromAccountUsername(fromUser)
+                                .fromAccountHolderName(fromHolder)
                                 .toAccountId(txn.getToAccountId())
                                 .toAccountUsername(toUser)
+                                .toAccountHolderName(toHolder)
                                 .amount(txn.getAmount())
                                 .status(txn.getStatus())
                                 .timestamp(txn.getCreatedOn())

@@ -1,138 +1,75 @@
 import { Component, OnInit } from '@angular/core';
+import { ApiService } from '../api.service';
 import { Router } from '@angular/router';
-import { ApiService, Account, TransactionHistoryResponse, TransferRequest } from '../api.service';
-import { AuthService } from '../auth.service';
-
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
-  account: Account | null = null;
-  transactions: TransactionHistoryResponse[] = [];
+  user: any;
+  account: any;
+  history: any[] = [];
+  targetId: any;
+  amount: any;
 
-  // Transfer form
-  targetAccountId: number | null = null;
-  transferAmount: number | null = null;
-  transferLoading = false;
-  transferError = '';
-  transferSuccess = '';
+  showSuccessModal = false;
+  lastTransaction = { targetId: 0, amount: 0 };
 
-  // Role-based properties
   isAdmin = false;
-  canTransfer = false;
 
-  constructor(
-    private apiService: ApiService,
-    private authService: AuthService,
-    private router: Router
-  ) { }
+  constructor(private api: ApiService, private router: Router) { }
 
   ngOnInit() {
-    if (!this.authService.isLoggedIn()) {
+    this.isAdmin = this.api.isAdmin();
+    const userData = localStorage.getItem('user');
+    if (!userData) {
       this.router.navigate(['/']);
       return;
     }
-
-    // Set role-based flags
-    this.isAdmin = this.authService.isAdmin();
-    this.canTransfer = this.authService.canTransfer();
-
+    this.user = JSON.parse(userData);
     this.loadData();
   }
 
   loadData() {
-    const user = this.authService.getCurrentUser();
-    if (!user) return;
-
-    // For admin, we don't need to load account details
-    if (!this.isAdmin && user.accountId) {
-      this.apiService.getAccount(user.accountId).subscribe({
-        next: (account) => {
-          this.account = account;
-        },
-        error: (err) => {
-          console.error('Error loading account:', err);
-        }
+    this.api.getAccount(this.user.accountId).subscribe(data => {
+      console.log('Account Data:', data);  // Debugging log
+      this.account = data;
+      this.api.getHistory(this.account.id).subscribe(hist => {
+        console.log('Transaction History:', hist);  // Debugging log
+        this.history = hist;
       });
-    }
-
-    // Load transactions based on role (API handles role-based filtering)
-    this.loadTransactions();
-  }
-
-  loadTransactions() {
-    this.apiService.getTransactionHistory().subscribe({
-      next: (transactions) => {
-        this.transactions = transactions.sort((a, b) =>
-          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-        );
-      },
-      error: (err) => {
-        console.error('Error loading transactions:', err);
-      }
     });
   }
 
   sendMoney() {
-    if (!this.canTransfer) {
-      this.transferError = 'You are not authorized to make transfers.';
-      return;
-    }
+    if (!this.targetId || !this.amount) return;
 
-    if (!this.targetAccountId || !this.transferAmount || !this.account) return;
+    this.api.transfer(this.account.id, Number(this.targetId), Number(this.amount)).subscribe({
+      next: () => {
+        // Capture transaction details for the modal
+        this.lastTransaction = {
+          targetId: this.targetId,
+          amount: this.amount
+        };
 
-    this.transferLoading = true;
-    this.transferError = '';
-    this.transferSuccess = '';
+        this.loadData(); // Refresh balance and history
+        this.showSuccessModal = true; // Show success modal
 
-    const request: TransferRequest = {
-      fromAccountId: this.account.id,
-      toAccountId: this.targetAccountId,
-      amount: this.transferAmount,
-      idempotencyKey: this.apiService.generateIdempotencyKey()
-    };
-
-    this.apiService.transfer(request).subscribe({
-      next: (response) => {
-        this.transferLoading = false;
-        this.transferSuccess = `Transfer successful! Transaction ID: ${response.transactionId}`;
-        this.targetAccountId = null;
-        this.transferAmount = null;
-        this.loadData();
+        // Clear inputs
+        this.targetId = '';
+        this.amount = '';
       },
-      error: (err) => {
-        this.transferLoading = false;
-        if (err.status === 403) {
-          this.transferError = 'You are not authorized to make transfers.';
-        } else {
-          this.transferError = err.error?.message || 'Transfer failed. Please check balance and account ID.';
-        }
-      }
+      error: () => alert("Transfer Failed! Check balance or ID.")
     });
   }
 
+  closeModal() {
+    this.showSuccessModal = false;
+  }
+
   logout() {
-    this.authService.logout();
+    localStorage.clear();
     this.router.navigate(['/']);
-  }
-
-  getTransactionType(txn: TransactionHistoryResponse): string {
-    if (!this.account) return '';
-    return txn.fromAccountId === this.account.id ? 'SENT' : 'RECEIVED';
-  }
-
-  getTransactionAmount(txn: TransactionHistoryResponse): string {
-    if (!this.account) {
-      // For admin view, just show the amount
-      return `$${txn.amount.toFixed(2)}`;
-    }
-    const prefix = txn.fromAccountId === this.account.id ? '-' : '+';
-    return `${prefix}$${txn.amount.toFixed(2)}`;
-  }
-
-  getCurrentUsername(): string {
-    return this.authService.getCurrentUser()?.username || '';
   }
 }

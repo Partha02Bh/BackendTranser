@@ -1,0 +1,48 @@
+<div class="profile-wrapper">
+    <div class="profile-header">
+        <h1>Profile</h1>
+        <div class="header-buttons">
+            <button (click)="goBack()" class="btn secondary-btn">← Back to Dashboard</button>
+            <button (click)="logout()" class="btn danger-btn">Logout</button>
+        </div>
+    </div>
+
+    <div class="profile-card" *ngIf="account">
+        <div class="avatar">
+            <div class="avatar-circle">{{ user?.holderName?.charAt(0) | uppercase }}</div>
+        </div>
+
+        <div class="profile-details">
+            <div class="detail-row">
+                <span class="label">Full Name</span>
+                <span class="value">{{ account.holderName }}</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="label">Username</span>
+                <span class="value">{{ user?.username }}</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="label">Account ID</span>
+                <span class="value">#{{ account.id }}</span>
+            </div>
+
+            <div class="detail-row">
+                <span class="label">Account Status</span>
+                <span class="value status-badge" [class.active]="account.status === 'ACTIVE'">
+                    {{ account.status }}
+                </span>
+            </div>
+
+            <div class="detail-row balance-row">
+                <span class="label">Current Balance</span>
+                <span class="value balance">₹ {{ account.balance }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading" *ngIf="!account">
+        Loading profile...
+    </div>
+</div>

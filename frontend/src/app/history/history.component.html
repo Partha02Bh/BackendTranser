@@ -1,0 +1,110 @@
+<div class="layout-container">
+    <!-- SIDEBAR (Reused/Shared or duplicated for now, strictly we should make it a layout component but sticking to copy for speed as per instructions to not add new generic features) -->
+    <!-- Actually, user wants icon navigation FROM dashboard. So this page needs to LOOK like a page. I will include the sidebar for consistency. -->
+    <nav class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+            </div>
+            <span class="brand-name">MTS Bank</span>
+        </div>
+
+        <div class="nav-links">
+            <a routerLink="/dashboard" class="nav-item">
+                <span>Dashboard</span>
+            </a>
+            <a routerLink="/history" class="nav-item active">
+                <span>History</span>
+            </a>
+            <a routerLink="/transfer" class="nav-item" *ngIf="!isAdmin">
+                <span>Transfer</span>
+            </a>
+        </div>
+
+        <div class="logout-container">
+            <button (click)="logout()" class="logout-btn">Logout</button>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <header class="header">
+            <div class="greeting">
+                <h1>Transaction History</h1>
+                <p>View all your past transactions.</p>
+            </div>
+            <div class="header-actions">
+                <button class="top-logout-btn" (click)="logout()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    Logout
+                </button>
+                <div class="user-avatar" title="Go to Profile" routerLink="/profile" style="cursor: pointer;">
+                    {{ user?.username?.charAt(0)?.toUpperCase() }}
+                </div>
+            </div>
+        </header>
+
+        <div class="card history-card">
+            <table *ngIf="history.length > 0">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>To/From</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th style="text-align: right;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let txn of history">
+                        <td>{{ txn.timestamp | date:'MMM d, y, h:mm a' }}</td>
+                        <td>
+                            <div class="user-info">
+                                <div class="avatar-circle">
+                                    {{ (txn.fromAccountId === account?.id ? txn.toAccountHolderName :
+                                    txn.fromAccountHolderName)?.charAt(0) }}
+                                </div>
+                                <div class="user-text">
+                                    <span class="user-name">
+                                        {{ txn.fromAccountId === account?.id ? txn.toAccountHolderName :
+                                        txn.fromAccountHolderName }}
+                                    </span>
+                                    <span class="user-type-label">
+                                        {{ txn.fromAccountId === account?.id ? 'To Account #' + txn.toAccountId : 'From
+                                        Account #' + txn.fromAccountId }}
+                                    </span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="status-pill"
+                                [style.background]="txn.fromAccountId === account?.id ? '#fee2e2' : '#dcfce7'"
+                                [style.color]="txn.fromAccountId === account?.id ? '#b91c1c' : '#15803d'">
+                                {{ txn.fromAccountId === account?.id ? 'Debit' : 'Credit' }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="status-pill">{{ txn.status }}</span>
+                        </td>
+                        <td style="text-align: right; font-weight: 600;"
+                            [class.sent]="txn.fromAccountId === account?.id"
+                            [class.received]="txn.toAccountId === account?.id">
+                            {{ txn.fromAccountId === account?.id ? '-' : '+' }} ₹{{ txn.amount | number:'1.2-2' }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div *ngIf="history.length === 0" class="empty-state">
+                No transactions found.
+            </div>
+        </div>
+    </main>
+</div>

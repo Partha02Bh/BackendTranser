@@ -28,6 +28,9 @@ public class Account {
     @Column(unique = true, nullable = false)
     private String username;
 
+    @Column(nullable = false, columnDefinition = "varchar(255) default '$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG'")
+    private String password;
+
     @Column(name = "holder_name", nullable = false)
     private String holderName;
 
@@ -38,11 +41,15 @@ public class Account {
     @Column(nullable = false)
     private AccountStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, columnDefinition = "varchar(255) default 'USER'")
+    private com.mts.domain.enums.Role role;
+
     @Version
     private Integer version; // for optimistic locking
 
     @UpdateTimestamp
-    @Column(name = "last_updated")
+    @Column(name = "last_updated", insertable = false)
     private LocalDateTime lastUpdated;
 
     public void debit(BigDecimal amount) {

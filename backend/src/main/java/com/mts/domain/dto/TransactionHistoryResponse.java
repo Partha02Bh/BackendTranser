@@ -21,8 +21,10 @@ public class TransactionHistoryResponse {
     private UUID transactionId;
     private Long fromAccountId;
     private String fromAccountUsername;
+    private String fromAccountHolderName;
     private Long toAccountId;
     private String toAccountUsername;
+    private String toAccountHolderName;
     private BigDecimal amount;
     private TransactionStatus status;
     private LocalDateTime timestamp;

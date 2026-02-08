@@ -48,6 +48,11 @@ dependencies {
 	// Database - MySQL 8.x compatible connector
 	runtimeOnly 'com.mysql:mysql-connector-j:8.3.0'
 	
+	// JWT Support
+	implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'
+	
 	// Test dependencies (JUnit 5.x included via spring-boot-starter-test)
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'

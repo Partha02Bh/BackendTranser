@@ -1,0 +1,366 @@
+/* Reusing Sidebar/Layout styles roughly, but scoped */
+:host {
+    display: block;
+    background-color: #f8fafc;
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+    color: #1f2937;
+}
+
+.layout-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 280px;
+    background-color: #1b5e20;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 32px 24px;
+    flex-shrink: 0;
+    position: fixed;
+    height: 100vh;
+    left: 0;
+    top: 0;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 48px;
+    padding-left: 12px;
+}
+
+.brand-icon {
+    background: rgba(255, 255, 255, 0.2);
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.brand-name {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 20px;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    border-radius: 12px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.nav-item:hover,
+.nav-item.active {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.logout-container {
+    margin-top: auto;
+}
+
+.logout-btn {
+    width: 100%;
+    padding: 14px;
+    background-color: rgba(60, 99, 64, 0.4);
+    color: #a5d6a7;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.logout-btn:hover {
+    background-color: rgba(60, 99, 64, 0.6);
+    color: white;
+}
+
+.main-content {
+    flex: 1;
+    margin-left: 280px;
+    padding: 40px 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    /* Changed from center to align top like dashboard */
+    align-items: center;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 40px;
+    width: 100%;
+    text-align: left;
+    /* Reset text align */
+}
+
+.header h1 {
+    font-size: 28px;
+    /* Match dashboard */
+    font-weight: 800;
+    color: #1b5e20;
+    margin: 0 0 8px 0;
+    letter-spacing: -0.03em;
+}
+
+.header p {
+    color: #64748b;
+    margin: 0;
+    font-size: 15px;
+    /* Match dashboard */
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.top-logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    color: #ef4444;
+    border-radius: 99px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.top-logout-btn:hover {
+    background-color: #fef2f2;
+    border-color: #fee2e2;
+    transform: translateY(-1px);
+}
+
+.user-avatar {
+    width: 48px;
+    height: 48px;
+    background-color: #4caf50;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 700;
+    font-size: 18px;
+    box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+}
+
+.card {
+    background: white;
+    border-radius: 24px;
+    padding: 48px;
+    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
+    /* Better shadow */
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    width: 100%;
+    max-width: 480px;
+    /* Constrain width */
+    margin: 0 auto;
+}
+
+.input-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.input-box {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 15px;
+    margin-bottom: 24px;
+    background: #f8fafc;
+    color: #334155;
+    transition: all 0.2s;
+    box-sizing: border-box;
+}
+
+.input-box:focus {
+    outline: none;
+    background: white;
+    border-color: #2e7d32;
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+}
+
+.send-btn {
+    width: 100%;
+    background-color: #1b5e20;
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.send-btn:hover {
+    background-color: #14532d;
+    transform: translateY(-1px);
+}
+
+/* MODAL */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.modal-content {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* ANIMATIONS */
+@keyframes scaleUp {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+
+    60% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes drawCheck {
+    0% {
+        stroke-dasharray: 100;
+        stroke-dashoffset: 100;
+    }
+
+    100% {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.success-icon-container {
+    width: 80px;
+    height: 80px;
+    background: #dcfce7;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    animation: scaleUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.checkmark-svg {
+    width: 40px;
+    height: 40px;
+    stroke: #16a34a;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+}
+
+.checkmark-path {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    animation: drawCheck 0.6s 0.3s ease-out forwards;
+}
+
+.success-title {
+    margin: 0 0 8px 0;
+    color: #1b5e20;
+    font-size: 24px;
+    font-weight: 800;
+    animation: fadeInUp 0.5s 0.2s ease-out forwards;
+    opacity: 0;
+}
+
+.success-desc {
+    color: #64748b;
+    margin-bottom: 32px;
+    font-size: 16px;
+    animation: fadeInUp 0.5s 0.3s ease-out forwards;
+    opacity: 0;
+}
+
+.success-close-btn {
+    width: 100%;
+    background-color: #1b5e20;
+    color: white;
+    border: none;
+    padding: 16px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    animation: fadeInUp 0.5s 0.4s ease-out forwards;
+    opacity: 0;
+}
+
+.success-close-btn:hover {
+    background-color: #14532d;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(27, 94, 32, 0.2);
+}

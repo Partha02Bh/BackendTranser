@@ -1,60 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-
-export interface Account {
-  id: number;
-  username: string;
-  holderName: string;
-  balance: number;
-  status: string;
-  lastUpdated: string;
-}
-
-export interface BalanceResponse {
-  accountId: number;
-  balance: number;
-}
-
-export interface TransferRequest {
-  fromAccountId: number;
-  toAccountId: number;
-  amount: number;
-  idempotencyKey: string;
-}
-
-export interface TransferResponse {
-  transactionId: string;
-  fromAccountId: number;
-  toAccountId: number;
-  amount: number;
-  status: string;
-  message: string;
-  timestamp: string;
-}
-
-export interface TransactionLog {
-  id: string;
-  fromAccountId: number;
-  toAccountId: number;
-  amount: number;
-  status: string;
-  failureReason: string;
-  idempotencyKey: string;
-  createdOn: string;
-}
-
-// New interface for transaction history response
-export interface TransactionHistoryResponse {
-  transactionId: string;
-  fromAccountId: number;
-  fromAccountUsername: string;
-  toAccountId: number;
-  toAccountUsername: string;
-  amount: number;
-  status: string;
-  timestamp: string;
-}
+import { Observable, tap } from 'rxjs';
 
 export interface LoginResponse {
   accountId: number;
@@ -63,6 +9,14 @@ export interface LoginResponse {
   balance: number;
   status: string;
   message: string;
+  token: string;
+  role?: string;
+}
+
+export interface OtpResponse {
+  message: string;
+  username: string;
+  otp: string;  // For demo only - remove in production
 }
 
 @Injectable({
@@ -74,52 +28,90 @@ export class ApiService {
 
   constructor(private http: HttpClient) { }
 
-  // Auth endpoint
-  login(username: string): Observable<LoginResponse> {
-    return this.http.get<LoginResponse>(`${this.baseUrl}/auth/login?username=${encodeURIComponent(username)}`);
-  }
-
-  // Account endpoints
-  getAccount(accountId: number): Observable<Account> {
-    return this.http.get<Account>(`${this.baseUrl}/accounts/${accountId}`);
-  }
-
-  getAccountByUsername(username: string): Observable<Account> {
-    return this.http.get<Account>(`${this.baseUrl}/accounts/by-username/${encodeURIComponent(username)}`);
-  }
-
-  getBalance(accountId: number): Observable<BalanceResponse> {
-    return this.http.get<BalanceResponse>(`${this.baseUrl}/accounts/${accountId}/balance`);
-  }
-
-  // Old method for backward compatibility
-  getTransactions(accountId: number): Observable<TransactionLog[]> {
-    return this.http.get<TransactionLog[]>(`${this.baseUrl}/accounts/${accountId}/transactions`);
+  /**
+   * Step 1: Login with credentials - returns OTP
+   */
+  login(username: string, password: string, role: string): Observable<OtpResponse> {
+    return this.http.post<OtpResponse>(`${this.baseUrl}/auth/login`, { username, password, role });
   }
 
   /**
-   * Get transaction history based on user role.
-   * - ADMIN: Returns all transactions
-   * - USER: Returns only their transactions
+   * Step 2: Verify OTP - returns JWT token
    */
-  getTransactionHistory(): Observable<TransactionHistoryResponse[]> {
-    return this.http.get<TransactionHistoryResponse[]>(`${this.baseUrl}/transfers`);
+  verifyOtp(username: string, otp: string): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.baseUrl}/auth/verify-otp`, { username, otp })
+      .pipe(
+        tap(response => {
+          if (response.token) {
+            localStorage.setItem('jwt_token', response.token);
+            localStorage.setItem('user', JSON.stringify({
+              accountId: response.accountId,
+              username: response.username,
+              holderName: response.holderName,
+              balance: response.balance,
+              status: response.status,
+              role: response.role // Store role
+            }));
+          }
+        })
+      );
   }
 
-  /**
-   * Get all transactions (ADMIN only).
-   */
-  getAllTransactions(): Observable<TransactionHistoryResponse[]> {
-    return this.http.get<TransactionHistoryResponse[]>(`${this.baseUrl}/transfers/all`);
+  register(userData: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}/auth/register`, userData);
   }
 
-  // Transfer endpoint
-  transfer(request: TransferRequest): Observable<TransferResponse> {
-    return this.http.post<TransferResponse>(`${this.baseUrl}/transfers`, request);
+  logout(): void {
+    localStorage.removeItem('jwt_token');
+    localStorage.removeItem('user');
   }
 
-  // Helper to generate idempotency key
-  generateIdempotencyKey(): string {
-    return 'txn-' + Date.now() + '-' + Math.random().toString(36).substring(2, 9);
+  getToken(): string | null {
+    return localStorage.getItem('jwt_token');
+  }
+
+  isLoggedIn(): boolean {
+    return !!this.getToken();
+  }
+
+  getCurrentUser(): any {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
+  }
+
+  isAdmin(): boolean {
+    const user = this.getCurrentUser();
+    return user && (user.role === 'ADMIN' || user.role === 'OWNER');
+  }
+
+  getAccount(accountId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/accounts/${accountId}`);
+  }
+
+  getTransactionHistory(accountId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/accounts/${accountId}/transactions`);
+  }
+
+  // Alias for backward compatibility
+  getHistory(accountId: number): Observable<any[]> {
+    return this.getTransactionHistory(accountId);
+  }
+
+  getAllTransactions(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/transfers/all`);
+  }
+
+  transfer(sourceId: number, targetId: number, amount: number): Observable<any> {
+    const idempotencyKey = this.generateIdempotencyKey();
+    return this.http.post<any>(`${this.baseUrl}/transfers`, {
+      fromAccountId: sourceId,
+      toAccountId: targetId,
+      amount: amount,
+      idempotencyKey: idempotencyKey
+    });
+  }
+
+  private generateIdempotencyKey(): string {
+    return `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
   }
 }

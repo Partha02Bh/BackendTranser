@@ -81,7 +81,7 @@ class AccountServiceTest {
         when(txnRepo.findByFromAccountIdOrToAccountId(1L, 1L))
                 .thenReturn(List.of(new TransactionLog(), new TransactionLog()));
 
-        List<TransactionLog> txns = accountService.getTransactions(1L);
+        List<com.mts.domain.dto.TransactionHistoryResponse> txns = accountService.getTransactions(1L);
 
         assertThat(txns).hasSize(2);
     }

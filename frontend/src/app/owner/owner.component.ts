@@ -1,37 +1,27 @@
 import { Component, OnInit } from '@angular/core';
+import { ApiService } from '../api.service';
 import { Router } from '@angular/router';
-import { ApiService, TransactionLog } from '../api.service';
-import { AuthService } from '../auth.service';
-
 @Component({
   selector: 'app-owner',
   templateUrl: './owner.component.html',
   styleUrls: ['./owner.component.css']
 })
 export class OwnerComponent implements OnInit {
-  allTransactions: TransactionLog[] = [];
-  loading = true;
-  error = '';
+  allTransactions: any[] = [];
 
-  constructor(
-    private api: ApiService,
-    private authService: AuthService,
-    private router: Router
-  ) { }
+  user: any;
+
+  constructor(private api: ApiService, private router: Router) { }
 
   ngOnInit() {
-    if (!this.authService.isLoggedIn()) {
-      this.router.navigate(['/']);
-      return;
-    }
-    // For admin view, we could fetch transactions for all accounts
-    // For now, we'll show a message that this feature requires admin backend
-    this.loading = false;
-    this.error = 'Owner dashboard requires admin endpoint implementation on backend.';
+    this.user = this.api.getCurrentUser();
+    this.api.getAllTransactions().subscribe(data => {
+      this.allTransactions = data
+    });
   }
 
   logout() {
-    this.authService.logout();
+    localStorage.clear();
     this.router.navigate(['/']);
   }
 }

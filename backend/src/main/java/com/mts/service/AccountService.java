@@ -22,6 +22,31 @@ public class AccountService {
 
     private final AccountRepository accounts;
     private final TransactionLogRepository transactions;
+    private final org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
+    @Transactional
+    public void createAccount(com.mts.domain.dto.RegisterRequest request) {
+        log.info("Creating new account for user: {}", request.getUsername());
+
+        // Check if username exists
+        if (accounts.findByUsername(request.getUsername()).isPresent()) {
+            throw new RuntimeException("Username already exists");
+        }
+
+        // Create new account
+        Account account = Account.builder()
+                .username(request.getUsername())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .holderName(request.getHolderName())
+                // Default to 0 if null, otherwise use requested balance (for demo purposes)
+                .balance(request.getInitialBalance() != null ? request.getInitialBalance() : java.math.BigDecimal.ZERO)
+                .status(com.mts.domain.enums.AccountStatus.ACTIVE)
+                .role(com.mts.domain.enums.Role.USER)
+                .build();
+
+        accounts.save(account);
+        log.info("Account created successfully with ID: {}", account.getId());
+    }
 
     @Transactional(readOnly = true)
     public AccountResponse getAccount(Long id) {
@@ -49,7 +74,7 @@ public class AccountService {
     }
 
     @Transactional(readOnly = true)
-    public List<TransactionLog> getTransactions(Long id) {
+    public List<com.mts.domain.dto.TransactionHistoryResponse> getTransactions(Long id) {
         log.debug("Fetching txn history for account #{}", id);
 
         // make sure the account actually exists first
@@ -58,7 +83,32 @@ public class AccountService {
         }
 
         // grab all transactions where this account is involved
-        return transactions.findByFromAccountIdOrToAccountId(id, id);
+        List<TransactionLog> logs = transactions.findByFromAccountIdOrToAccountId(id, id);
+
+        return logs.stream()
+                .map(log -> {
+                    Account fromAccount = accounts.findById(log.getFromAccountId()).orElse(null);
+                    Account toAccount = accounts.findById(log.getToAccountId()).orElse(null);
+
+                    String fromUser = (fromAccount != null) ? fromAccount.getUsername() : "Unknown";
+                    String fromHolder = (fromAccount != null) ? fromAccount.getHolderName() : "Unknown";
+                    String toUser = (toAccount != null) ? toAccount.getUsername() : "Unknown";
+                    String toHolder = (toAccount != null) ? toAccount.getHolderName() : "Unknown";
+
+                    return com.mts.domain.dto.TransactionHistoryResponse.builder()
+                            .transactionId(log.getId())
+                            .fromAccountId(log.getFromAccountId())
+                            .fromAccountUsername(fromUser)
+                            .fromAccountHolderName(fromHolder)
+                            .toAccountId(log.getToAccountId())
+                            .toAccountUsername(toUser)
+                            .toAccountHolderName(toHolder)
+                            .amount(log.getAmount())
+                            .status(log.getStatus())
+                            .timestamp(log.getCreatedOn())
+                            .build();
+                })
+                .toList();
     }
 
     // helper to avoid repeating the same lookup pattern

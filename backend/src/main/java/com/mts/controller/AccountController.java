@@ -2,7 +2,7 @@ package com.mts.controller;
 
 import com.mts.domain.dto.AccountResponse;
 import com.mts.domain.dto.BalanceResponse;
-import com.mts.domain.entity.TransactionLog;
+import com.mts.domain.dto.BalanceResponse;
 import com.mts.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,9 +39,8 @@ public class AccountController {
 
     // GET /api/v1/accounts/{id}/transactions
     @GetMapping("/{id}/transactions")
-    public ResponseEntity<List<TransactionLog>> getTransactions(@PathVariable Long id) {
+    public ResponseEntity<List<com.mts.domain.dto.TransactionHistoryResponse>> getTransactions(@PathVariable Long id) {
         log.debug("Txn history requested for #{}", id);
-        List<TransactionLog> txns = svc.getTransactions(id);
-        return ResponseEntity.ok(txns);
+        return ResponseEntity.ok(svc.getTransactions(id));
     }
 }

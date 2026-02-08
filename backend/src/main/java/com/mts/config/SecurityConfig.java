@@ -1,79 +1,71 @@
 package com.mts.config;
 
+import com.mts.security.JwtAuthenticationFilter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 /*
- * Spring Security setup - Basic Auth protecting all /api/** endpoints.
- * Using in-memory users for demo purposes.
+ * Spring Security setup - JWT-based stateless authentication.
  */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
+@RequiredArgsConstructor
 public class SecurityConfig {
+
+        private final JwtAuthenticationFilter jwtAuthFilter;
+        private final UserDetailsService userDetailsService;
+        private final PasswordEncoder passwordEncoder;
 
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
                 http
-                                .cors(Customizer.withDefaults())
-                                .csrf(csrf -> csrf.disable()) // disabled for REST API
+                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                                .csrf(csrf -> csrf.disable())
                                 .authorizeHttpRequests(auth -> auth
+                                                .requestMatchers("/api/v1/auth/login", "/api/v1/auth/verify-otp",
+                                                                "/api/v1/auth/register")
+                                                .permitAll()
                                                 .requestMatchers("/api/**").authenticated()
                                                 .anyRequest().permitAll())
-                                .httpBasic(Customizer.withDefaults());
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .authenticationProvider(authenticationProvider())
+                                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
                 return http.build();
         }
 
         @Bean
-        public UserDetailsService userDetailsService(PasswordEncoder encoder) {
-                // admin user
-                UserDetails admin = User.builder()
-                                .username("admin")
-                                .password(encoder.encode("admin123"))
-                                .roles("ADMIN")
-                                .build();
-
-                // regular users - just create them in a list for easier management
-                String[] regularUsers = { "user", "alice", "bob", "charlie", "diana", "emma" };
-
-                List<UserDetails> users = Stream.of(regularUsers)
-                                .map(name -> User.builder()
-                                                .username(name)
-                                                .password(encoder.encode(name + "123")) // password = username + "123"
-                                                .roles("USER")
-                                                .build())
-                                .toList();
-
-                // combine admin + regular users
-                InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
-                manager.createUser(admin);
-                users.forEach(manager::createUser);
-
-                return manager;
+        public AuthenticationProvider authenticationProvider() {
+                DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+                provider.setUserDetailsService(userDetailsService);
+                provider.setPasswordEncoder(passwordEncoder);
+                return provider;
         }
 
         @Bean
-        public PasswordEncoder passwordEncoder() {
-                return new BCryptPasswordEncoder();
+        public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+                return config.getAuthenticationManager();
         }
 
         @Bean

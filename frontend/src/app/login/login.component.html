@@ -1,26 +1,98 @@
-<div class="login-container">
-  <div class="login-card">
-    <h2>Money Transfer System</h2>
-    <h3>Login</h3>
+<div class="login-wrapper">
 
-    <div *ngIf="error" class="error">{{ error }}</div>
+  <h1 class="main-title">Money Transfer System</h1>
 
-    <form (ngSubmit)="onLogin()">
-      <div class="form-group">
-        <label>Username</label>
-        <input type="text" [(ngModel)]="username" name="username" required placeholder="Enter username">
+  <!-- OTP Popup -->
+  <div *ngIf="showOtpPopup" class="otp-popup-overlay">
+    <div class="otp-popup">
+      <h3>🔐 Your OTP</h3>
+      <div class="otp-code">{{ displayedOtp }}</div>
+      <p class="otp-timer">Closing in {{ otpCountdown }}s</p>
+      <button (click)="closeOtpPopup()" class="btn primary-btn">Got it!</button>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+  </div>
+
+  <div class="card-container">
+
+    <!-- USER LOGIN CARD -->
+    <div class="login-card">
+
+      <h2>User Login</h2>
+
+      <!-- Step 1: Credentials -->
+      <div *ngIf="step === 1">
+        <input [(ngModel)]="userUsername" placeholder="Username" class="input-box" type="text" [disabled]="isLoading" />
+
+        <input [(ngModel)]="userPassword" placeholder="Password" class="input-box" type="password"
+          [disabled]="isLoading" (keyup.enter)="selectRoleAndLogin('USER')" />
+
+        <button (click)="selectRoleAndLogin('USER')" class="btn primary-btn" [disabled]="isLoading">
+          {{ isLoading && selectedRole === 'USER' ? 'Sending OTP...' : 'Get OTP' }}
+        </button>
       </div>
 
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" [(ngModel)]="password" name="password" required placeholder="Enter password">
+      <!-- Step 2: OTP Verification -->
+      <div *ngIf="step === 2 && selectedRole === 'USER'">
+        <p class="info-text">Enter OTP sent to your device</p>
+
+        <input [(ngModel)]="userOtp" placeholder="Enter 6-digit OTP" class="input-box" type="text" maxlength="6"
+          [disabled]="isLoading" (keyup.enter)="onVerify()" />
+
+        <button (click)="onVerify()" class="btn success-btn" [disabled]="isLoading">
+          {{ isLoading ? 'Verifying...' : 'Verify & Login' }}
+        </button>
+
+        <button (click)="goBack()" class="btn secondary-btn" [disabled]="isLoading">
+          ← Back
+        </button>
       </div>
 
-      <button type="submit" [disabled]="loading || !username || !password">
-        {{ loading ? 'Logging in...' : 'Login' }}
-      </button>
-    </form>
+    </div>
 
-    <p class="hint">Test credentials: admin / admin123 or user / user123</p>
+    <!-- ADMIN LOGIN CARD -->
+    <div class="login-card admin-card">
+
+      <h2>Admin Login</h2>
+
+      <!-- Step 1: Credentials -->
+      <div *ngIf="step === 1">
+        <input [(ngModel)]="adminUsername" placeholder="Admin Username" class="input-box" type="text"
+          [disabled]="isLoading" />
+
+        <input [(ngModel)]="adminPassword" placeholder="Password" class="input-box" type="password"
+          [disabled]="isLoading" (keyup.enter)="selectRoleAndLogin('OWNER')" />
+
+        <button (click)="selectRoleAndLogin('OWNER')" class="btn danger-btn" [disabled]="isLoading">
+          {{ isLoading && selectedRole === 'OWNER' ? 'Sending OTP...' : 'Get OTP' }}
+        </button>
+      </div>
+
+      <!-- Step 2: OTP Verification -->
+      <div *ngIf="step === 2 && selectedRole === 'OWNER'">
+        <p class="info-text">Enter OTP sent to your device</p>
+
+        <input [(ngModel)]="adminOtp" placeholder="Enter 6-digit OTP" class="input-box" type="text" maxlength="6"
+          [disabled]="isLoading" (keyup.enter)="onVerify()" />
+
+        <button (click)="onVerify()" class="btn success-btn" [disabled]="isLoading">
+          {{ isLoading ? 'Verifying...' : 'Verify & Login' }}
+        </button>
+
+        <button (click)="goBack()" class="btn secondary-btn" [disabled]="isLoading">
+          ← Back
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+  <div style="text-align: center; margin-top: 20px;">
+    <p>Don't have an account? <a routerLink="/signup"
+        style="color: #1976d2; font-weight: bold; text-decoration: none;">Sign Up</a></p>
   </div>
 </div>

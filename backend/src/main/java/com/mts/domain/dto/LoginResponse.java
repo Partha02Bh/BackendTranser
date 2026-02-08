@@ -22,4 +22,6 @@ public class LoginResponse {
     private BigDecimal balance;
     private AccountStatus status;
     private String message;
+    private String token;
+    private String role;
 }
